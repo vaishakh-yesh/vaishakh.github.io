@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Processing  </title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.8.2/build/qrcode.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container" id="List">
+        <button id="checkColor"class="btn btn-outline-primary">check color</button>
+        <button onclick="increaseBrightness()" class="btn btn-outline-secondary">Increase Brightness</button>
+        <button onclick="duplicateImage()"class="btn btn-outline-success">Duplicate Image</button>
+        <button onclick="reduceResolution()"class="btn btn-outline-danger">Reduce Resolution</button>
+        <button onclick="createAvatar()"class="btn btn-outline-info">Create Avatar</button>
+        <button onclick="convertToGrayscale()"class="btn btn-outline-warning">Convert to Grayscale</button>
+        <button onclick="generateQRCode()"class="btn btn-outline-primary">Generate QR Code</button>
+
+        <div id="qrcode"></div>
+        <br>
+        <div class="photo-album container-fluid">
+            <img id="image" src="putin.jpg" width="20%">
+            <p id="result"></p>
+            <div id="qrcode"></div>
+            <canvas id="avatarCanvas" width="200" height="200"></canvas>
+
+        </div>
+    </div>
+    <hr>
+    <div class="container">
+        <p>Choose the options for filteration and click on the image for the thumbnail: </p>
+        <select id="filterSelect" onchange="filterImages()">
+            <option value="all">All</option>
+            <option value="cricket">cricket</option>
+            <option value="football">football</option>
+            <option value="politics">politics</option>
+        </select>
+
+        <!-- Images -->
+        <div id="imageContainer">
+
+            <img src="dhoni.jpg" onclick="createThumbnail(this)" class="cricket">
+            <img src="sachin.jpg" onclick="createThumbnail(this)" class="cricket">
+            <img src="sehwag.jpg" onclick="createThumbnail(this)" class="cricket">
+            <img src="ronaldo.jpg" onclick="createThumbnail(this)" class="football">
+            <img src="messi.jpg" onclick="createThumbnail(this)" class="football">
+            <img src="SJaishankar.jpg" onclick="createThumbnail(this)" class="politics">
+            <h4>Click on the image for the thubnail</h4>
+            <div id="thumbnailContainer"></div>
+
+
+        </div>
+    </div>
+    <script>
+        const checkColor = document.getElementById('checkColor');
+        const myImage = document.getElementById('image');
+        const result = document.getElementById('result');
+
+        checkColor.addEventListener('click', () => {
+            const img = new Image();
+            img.src = myImage.src;
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                let rCount = 0;
+                let gCount = 0;
+                let bCount = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    if (data[i] > data[i + 1] + data[i + 2]) {
+                        rCount++;
+                    } else if (data[i + 1] > data[i] + data[i + 2]) {
+                        gCount++;
+                    } else {
+                        bCount++;
+                    }
+                }
+                let resultText = '';
+                if (rCount > gCount && rCount > bCount) {
+                    resultText = 'The image is reddish.';
+                } else if (gCount > rCount && gCount > bCount) {
+                    resultText = 'The image is greenish.';
+                } else {
+                    resultText = 'The image is blueish.';
+                }
+                result.textContent = resultText;
+            };
+        });
+
+        function duplicateImage() {
+            var originalImage = document.getElementById('image');
+            var duplicatedImage = document.createElement('img');
+            var v = document.getElementsByClassName('container')
+
+            duplicatedImage.src = originalImage.src;
+            document.getElementById("List").appendChild(duplicatedImage);
+        }
+
+        function increaseBrightness() {
+            var image = document.getElementById('Image');
+            var current = parseInt(image.style.filter.replace(/[^\d.]/g, ''), 10) || 100;
+            var newb = current + 10;
+            image.style.filter = "brightness(" + newb + "%)";
+        }
+        function reduceResolution() {
+            var image = document.getElementById('image');
+            var cur_Wid = image.width;
+            var cur_Hei = image.height;
+            var newWidth = cur_Wid * 0.5;
+            var newHeight = cur_Hei * 0.5;
+
+            image.style.width = newWidth + 'px';
+            image.style.height = newHeight + 'px';
+        }
+        function createAvatar() {
+            const originalImage = document.getElementById("image");
+            const canvas = document.getElementById("avatarCanvas");
+            const context = canvas.getContext("2d");
+
+            const avatarSize = Math.min(canvas.width, canvas.height);
+            context.beginPath();
+            context.arc(avatarSize / 2, avatarSize / 2, avatarSize / 2, 0, 2 * Math.PI);
+            context.clip();
+            context.drawImage(originalImage, 0, 0, originalImage.naturalWidth, originalImage.naturalHeight, 0, 0, avatarSize, avatarSize);
+
+        }
+        function convertToGrayscale() {
+            var image = document.getElementById('image');
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0);
+
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+
+            for (var i = 0; i < data.length; i += 4) {
+                var r = data[i];
+                var g = data[i + 1];
+                var b = data[i + 2];
+                var grayscale = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+
+                data[i] = grayscale;
+                data[i + 1] = grayscale;
+                data[i + 2] = grayscale;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            image.src = canvas.toDataURL();
+        }
+        function generateQRCode() {
+
+            var image = document.getElementById('image');
+            var imageUrl = image.src;
+            var qrcode = new QRCode(document.getElementById('qrcode'), {
+                width: 200,
+                height: 200
+            });
+            qrcode.makeCode(imageUrl);
+        }
+        function filterImages() {
+
+            var selectedFilter = document.getElementById('filterSelect').value;
+
+            var images = document.getElementById('imageContainer').getElementsByTagName('img');
+
+            for (var i = 0; i < images.length; i++) {
+                var image = images[i];
+
+                // If the selected filter is "all" or the image has the same class as the selected filter, show it; otherwise, hide it
+                if (selectedFilter === 'all' || image.classList.contains(selectedFilter)) {
+                    image.style.display = 'inline-block'; // Show the image
+                } else {
+                    image.style.display = 'none'; // Hide the image
+                }
+            }
+        }
+        function createThumbnail(image) {
+
+            var thumbnail = document.createElement('img');
+
+            thumbnail.src = image.src;
+            thumbnail.classList.add('thumbnail');
+
+            document.getElementById('thumbnailContainer').appendChild(thumbnail);
+        }
+    </script>
+</body>
+
+</html>

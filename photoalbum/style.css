@@ -1,0 +1,23 @@
+.photo-album img {
+    object-fit: cover;
+    height: 200px;
+  }
+  
+  @media (min-width: 576px) {
+    .photo-album img {
+      height: 300px;
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .photo-album img {
+      height: 400px;
+    }
+  }
+  
+  @media (min-width: 992px) {
+    .photo-album img {
+      height: 500px;
+    }
+  }
+ 
